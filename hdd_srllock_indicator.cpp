@@ -8,11 +8,12 @@ const std::string SETLEDS_CMD = "/usr/bin/setleds";
 const double CHECK_INTERVAL = 0.1;
 const std::string CONSOLE = "/dev/console";
 const std::string INDICATOR = "scroll";
+const std::string DISKSTATS_PATH = "/proc/diskstats";
 
-std::string getVmstat() {
-    std::ifstream vmstatFile("/proc/vmstat");
+std::string getDiskstats() {
+    std::ifstream diskstatsFile(DISKSTATS_PATH);
     std::stringstream buffer;
-    buffer << vmstatFile.rdbuf();
+    buffer << diskstatsFile.rdbuf();
     return buffer.str();
 }
 
@@ -27,21 +28,21 @@ void led_off() {
 }
 
 int main() {
-    std::string newVmstat = getVmstat();
-    std::string oldVmstat = getVmstat();
+    std::string newDiskstats = getDiskstats();
+    std::string oldDiskstats = getDiskstats();
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::seconds(static_cast<int>(CHECK_INTERVAL)));
 
-        newVmstat = getVmstat();
+        newDiskstats = getDiskstats();
 
-        if (newVmstat == oldVmstat) {
+        if (newDiskstats == oldDiskstats) {
             led_off();
         } else {
             led_on();
         }
 
-        oldVmstat = newVmstat;
+        oldDiskstats = newDiskstats;
     }
 
     return 0;
